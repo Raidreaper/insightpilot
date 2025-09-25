@@ -1,0 +1,30 @@
+{
+  "name": "insightpilot",
+  "version": "1.0.0",
+  "description": "Smart Dashboard Builder - Turn your data into clear insights",
+  "main": "index.html",
+  "scripts": {
+    "dev": "npx http-server -p 8080 -c-1",
+    "start": "npx http-server -p 8080 -c-1",
+    "build": "echo 'No build process needed for static site'",
+    "test": "echo 'No tests specified'"
+  },
+  "keywords": [
+    "dashboard",
+    "data-visualization",
+    "analytics",
+    "charts",
+    "business-intelligence"
+  ],
+  "author": "InsightPilot Team",
+  "license": "MIT",
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  },
+  "dependencies": {
+    "firebase": "^12.3.0"
+  },
+  "engines": {
+    "node": ">=14.0.0"
+  }
+}

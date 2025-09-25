@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>InsightPilot - Smart Dashboard Builder</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <script src="https://unpkg.com/mammoth@1.4.2/mammoth.browser.min.js"></script>
+  <!-- Firebase SDKs (Compat for global usage without modules) -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-analytics-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <!-- Project-specific Firebase config (create firebase-config.js and paste your config) -->
+  <script src="firebase-config.js"></script>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="container">
+    <nav class="nav" role="navigation" aria-label="Primary">
+      <div class="nav-left">
+        <div class="brand-logo" aria-label="InsightPilot">
+          <span class="brand-mark">▰</span>
+          <span class="brand-text">InsightPilot</span>
+        </div>
+      </div>
+      <div class="nav-right">
+        <a href="#features" class="nav-link">Features</a>
+        <a href="#how" class="nav-link">How it works</a>
+        <button class="btn btn-secondary" id="headerTryDemoBtn">Try Demo</button>
+        <button class="btn btn-success" id="headerGetStartedBtn">Get Started</button>
+      </div>
+    </nav>
+    <header>
+      <h1>InsightPilot</h1>
+      <p class="tagline">Turn your data into clear insights — no expertise needed</p>
+    </header>
+
+    <!-- Landing Section -->
+    <section id="landing" aria-label="Landing">
+      <div class="card landing-hero glass">
+        <div class="blob blob-a" aria-hidden="true"></div>
+        <div class="blob blob-b" aria-hidden="true"></div>
+        <div class="hero-grid">
+          <div class="hero-copy">
+            <h2>Build dashboards from your data in minutes</h2>
+            <p class="hero-sub">Upload a CSV, pick metrics, and export beautiful insights — zero setup.</p>
+            <div class="hero-ctas">
+              <button class="btn btn-success" id="getStartedBtn">Get Started Free</button>
+              <button class="btn" id="tryDemoBtn">Try Demo</button>
+            </div>
+            <ul class="hero-points" role="list">
+              <li>Automatic analysis and chart suggestions</li>
+              <li>Export dashboards as PDF or image</li>
+              <li>Shareable links, no login required</li>
+            </ul>
+          </div>
+          <div class="hero-visual">
+            <div class="hero-screenshot" aria-hidden="true">
+              <svg viewBox="0 0 420 280" width="100%" height="100%" class="hero-svg">
+                <defs>
+                  <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+                    <stop offset="0%" stop-color="#00c2ff"/>
+                    <stop offset="50%" stop-color="#0a7cff"/>
+                    <stop offset="100%" stop-color="#7a5cff"/>
+                  </linearGradient>
+                </defs>
+                <rect x="0" y="0" width="420" height="280" rx="14" fill="#f4f6ff" stroke="#e2e6ff"/>
+                <polyline fill="none" stroke="url(#g1)" stroke-width="4" points="20,220 60,180 100,190 140,140 180,160 220,110 260,130 300,90 340,120 380,80"/>
+                <g fill="#dfe4ff">
+                  <rect x="20" y="240" width="80" height="20" rx="6"/>
+                  <rect x="110" y="240" width="80" height="20" rx="6"/>
+                  <rect x="200" y="240" width="80" height="20" rx="6"/>
+                  <rect x="290" y="240" width="80" height="20" rx="6"/>
+                </g>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card features" id="features">
+        <h3>Why InsightPilot?</h3>
+        <div class="features-grid">
+          <div class="feature">
+            <div class="feature-icon">⚡</div>
+            <h4>Fast</h4>
+            <p>Turn raw CSVs into clean dashboards with just a few clicks.</p>
+          </div>
+          <div class="feature">
+            <div class="feature-icon">🧠</div>
+            <h4>Smart</h4>
+            <p>We detect field types and suggest the best visualizations.</p>
+          </div>
+          <div class="feature">
+            <div class="feature-icon">📤</div>
+            <h4>Exportable</h4>
+            <p>Download tables and dashboards as PNG, PDF, or DOCX.</p>
+          </div>
+          <div class="feature">
+            <div class="feature-icon">🔗</div>
+            <h4>Shareable</h4>
+            <p>Create read-only links to share insights securely.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card trust" aria-label="Trusted by">
+        <div class="trust-row">
+          <span class="trust-label">Trusted by teams at</span>
+          <div class="logo" aria-hidden="true">Nova</div>
+          <div class="logo" aria-hidden="true">Aster</div>
+          <div class="logo" aria-hidden="true">Quanta</div>
+          <div class="logo" aria-hidden="true">Helix</div>
+          <div class="logo" aria-hidden="true">Vertex</div>
+        </div>
+      </div>
+
+      <div class="card how-it-works" id="how">
+        <h3>How it works</h3>
+        <ol class="steps" role="list">
+          <li><strong>Upload</strong> a CSV or paste table data.</li>
+          <li><strong>Preview</strong> and validate detected fields.</li>
+          <li><strong>Choose</strong> your metrics and visualizations.</li>
+          <li><strong>Generate</strong> a dashboard with insights.</li>
+          <li><strong>Export</strong> your table or dashboard as PNG, PDF, or DOC.</li>
+        </ol>
+      </div>
+    </section>
+
+    <div id="app" role="main">
+      <!-- Step 0: Authentication -->
+      <div id="step0" class="step">
+        <div class="card">
+          <h2>Welcome to InsightPilot</h2>
+          <p>Sign in to create and share your data insights</p>
+          
+          <div class="auth-container">
+            <div class="auth-tabs">
+              <button class="auth-tab active" id="loginTab">Sign In</button>
+              <button class="auth-tab" id="signupTab">Sign Up</button>
+            </div>
+            
+            <!-- Login Form -->
+            <div id="loginForm" class="auth-form active">
+              <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="loginEmail" placeholder="Enter your email" required />
+              </div>
+              <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="loginPassword" placeholder="Enter your password" required />
+              </div>
+              <button class="btn btn-success" id="loginBtn">Sign In</button>
+            </div>
+            
+            <!-- Signup Form -->
+            <div id="signupForm" class="auth-form">
+              <div class="form-group">
+                <label>Full Name</label>
+                <input type="text" id="signupName" placeholder="Enter your full name" required />
+              </div>
+              <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="signupEmail" placeholder="Enter your email" required />
+              </div>
+              <div class="form-group">
+                <label>Password</label>
+                <input type="password" id="signupPassword" placeholder="Create a password" required />
+              </div>
+              <div class="form-group">
+                <label>Confirm Password</label>
+                <input type="password" id="signupConfirmPassword" placeholder="Confirm your password" required />
+              </div>
+              <button class="btn btn-success" id="signupBtn">Create Account</button>
+            </div>
+          </div>
+          
+          <div class="demo-login">
+            <p>Or try the demo with sample data:</p>
+            <button class="btn btn-secondary" id="demoBtn">Continue as Demo User</button>
+            <p style="margin-top:15px;">Or sign in with Google:</p>
+            <button class="btn btn-success" id="googleSignInBtn" aria-label="Sign in with Google">Sign in with Google</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 1: Data Input -->
+      <div id="step1" class="step" role="region" aria-labelledby="step1-title">
+        <div class="card">
+          <h2 id="step1-title">Step 1: Add Your Data</h2>
+          <p>Upload files or connect your data sources. We'll detect the structure automatically.</p>
+
+          <div class="form-group">
+            <label>Upload CSV File</label>
+            <div class="file-upload" id="csvUpload">
+              <p>Drag & drop your CSV file here, or click to browse</p>
+              <input type="file" id="csvFile" accept=".csv" style="display: none;" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Google Forms Response URL (optional)</label>
+            <input type="url" id="googleFormUrl" placeholder="https://docs.google.com/forms/d/e/..." />
+            <p style="font-size: 0.8rem; color: var(--gray); margin-top: 5px;">
+              Paste the URL of your Google Form. We'll pull the latest responses.
+            </p>
+          </div>
+
+          <div class="form-group">
+            <label>Upload Word or PDF Document (optional)</label>
+            <div class="file-upload" id="docUpload">
+              <p>Drag & drop your .docx or .pdf file here</p>
+              <input type="file" id="docFile" accept=".docx,.pdf" style="display: none;" />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label>Manual Data Entry (optional)</label>
+            <textarea id="manualData" rows="5" placeholder="Enter data in table format:
+Product,Sales,Date
+Widget A,150,2025-01-15
+Widget B,200,2025-01-16"></textarea>
+            <p style="font-size: 0.8rem; color: var(--gray); margin-top: 5px;">
+              Use comma-separated values (CSV format) or tabular text.
+            </p>
+          </div>
+
+          <div class="navigation">
+            <button class="btn btn-success" id="loadDataBtn">Analyze Data</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2: Preview Data -->
+      <div id="step2" class="step" role="region" aria-labelledby="step2-title">
+        <div class="card">
+          <h2 id="step2-title">Step 2: Preview Your Data</h2>
+          <p>We've analyzed your data and detected the following fields:</p>
+          
+          <div id="loader" class="loader"></div>
+          
+          <div id="validationMessages" class="validation-messages" aria-live="polite"></div>
+
+          <div class="share-links" id="previewExportBar" aria-label="Export preview">
+            <button class="share-btn" id="exportPreviewPngBtn">🖼️ Export Preview as Image</button>
+            <button class="share-btn" id="exportPreviewPdfBtn">📄 Export Preview as PDF</button>
+            <button class="share-btn" id="exportPreviewDocBtn">📝 Export Preview as DOCX</button>
+          </div>
+
+          <div id="dataPreview" class="data-preview"></div>
+          
+          <div id="fieldTypes" style="margin: 20px 0;"></div>
+
+          <div class="navigation">
+            <button class="btn btn-secondary" id="backToStep1">Back</button>
+            <button class="btn btn-success" id="previewNextBtn">Select Metrics</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3: Select Metrics -->
+      <div id="step3" class="step" role="region" aria-labelledby="step3-title">
+        <div class="card">
+          <h2 id="step3-title">Step 3: Choose What to Visualize</h2>
+          <p>Select the key metrics you'd like to see in your dashboard:</p>
+
+          <div id="dimensionSelection" class="dimension-selection"></div>
+          <div id="metricsSelection" class="metrics-selection"></div>
+          <div id="aggregationControls" class="aggregation-controls"></div>
+
+          <div class="navigation">
+            <button class="btn btn-secondary" id="backToStep2">Back</button>
+            <button class="btn btn-success" id="metricsNextBtn">Choose Charts</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 4: Choose Visualizations -->
+      <div id="step4" class="step" role="region" aria-labelledby="step4-title">
+        <div class="card">
+          <h2 id="step4-title">Step 4: Choose Your Charts</h2>
+          <p>We've suggested the best chart types for your data:</p>
+
+          <div id="chartSuggestions" class="chart-suggestion"></div>
+
+          <div class="navigation">
+            <button class="btn btn-secondary" id="backToStep3">Back</button>
+            <button class="btn btn-success" id="chartsNextBtn">Generate Dashboard</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 5: Dashboard -->
+      <div id="step5" class="step" role="region" aria-labelledby="step5-title">
+        <div class="card">
+          <div class="dashboard-header">
+            <div>
+              <h2 id="step5-title">Your Dashboard</h2>
+              <p>Here's your automated dashboard with insights in plain English.</p>
+            </div>
+            <div class="user-info">
+              <span class="user-avatar">👤</span>
+              <span class="user-name" id="userDisplayName">Demo User</span>
+              <button class="btn btn-secondary" id="signOutBtn" style="margin-left:10px;">Sign Out</button>
+            </div>
+          </div>
+
+          <div class="summary-stats" id="summaryStats"></div>
+
+          <div class="insight-report" id="insightReport">
+            <p>Based on your data, we've generated a clear summary of what's happening and what it means for your business...</p>
+          </div>
+
+          <div class="filters" id="filters"></div>
+
+          <div class="dashboard-grid" id="dashboardGrid"></div>
+
+          <div class="share-links">
+            <button class="share-btn" id="exportPdfBtn">
+              📄 Export as PDF
+            </button>
+            <button class="share-btn" id="exportImageBtn">
+              🖼️ Export as Image
+            </button>
+            <button class="share-btn" id="shareLinkBtn">
+              🔗 Get Shareable Link
+            </button>
+            <button class="share-btn" id="refreshDataBtn">
+              🔄 Refresh Data
+            </button>
+          </div>
+
+          <div class="navigation">
+            <button class="btn btn-secondary" id="backToStep4">Back</button>
+            <button class="btn" id="startOverBtn">Start Over</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <footer>
+      <p>InsightPilot – Make smarter decisions with zero data science skills required.</p>
+    </footer>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

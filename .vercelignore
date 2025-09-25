@@ -1,0 +1,9 @@
+node_modules
+.firebase
+.firebaserc
+firebase.json
+README.md
+package-lock.json
+**/*.map
+**/*.md
+**/.DS_Store
