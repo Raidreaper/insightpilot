@@ -34,16 +34,7 @@ body {
   line-height: 1.6;
 }
 
-.skip-link {
-  position: absolute;
-  left: -9999px;
-  top: 0;
-  background: #000;
-  color: #fff;
-  padding: 8px 12px;
-  z-index: 1000;
-}
-.skip-link:focus { left: 16px; top: 16px; border-radius: 6px; }
+/* skip-link removed */
 
 .container {
   max-width: 1200px;
