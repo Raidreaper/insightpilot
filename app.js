@@ -39,6 +39,16 @@ const exportPdfBtn = document.getElementById('exportPdfBtn');
 const exportImageBtn = document.getElementById('exportImageBtn');
 const shareLinkBtn = document.getElementById('shareLinkBtn');
 const refreshDataBtn = document.getElementById('refreshDataBtn');
+// Step 5 export controls
+const renderFullTableBtn = document.getElementById('renderFullTableBtn');
+const exportFullTablePngBtn = document.getElementById('exportFullTablePngBtn');
+const exportFullTablePdfBtn = document.getElementById('exportFullTablePdfBtn');
+const exportFullTableDocBtn = document.getElementById('exportFullTableDocBtn');
+const exportSelectedImageBtn = document.getElementById('exportSelectedImageBtn');
+const exportSelectedPdfBtn = document.getElementById('exportSelectedPdfBtn');
+const shareSelectedBtn = document.getElementById('shareSelectedBtn');
+const fullDataTable = document.getElementById('fullDataTable');
+const metricSelector = document.getElementById('metricSelector');
 
 // Authentication DOM Elements
 const loginTab = document.getElementById('loginTab');
@@ -770,6 +780,10 @@ document.getElementById('chartsNextBtn').addEventListener('click', () => {
   });
   
   generateDashboard();
+  // Build selector UI after dashboard renders
+  if (typeof renderMetricSelector === 'function') {
+    try { renderMetricSelector(); } catch (e) { /* noop */ }
+  }
   goToStep(5);
 });
 
@@ -1379,6 +1393,116 @@ function refreshCharts() {
     createChart(metric.field, state.chartTypes[metric.field]);
   });
 }
+
+// Build complete data table from parsed data
+function renderFullDataTable() {
+  if (!state.headers || state.headers.length === 0) return;
+  let html = '<table><thead><tr>' + state.headers.map(h => `<th>${h}</th>`).join('') + '</tr></thead><tbody>';
+  state.parsedData.forEach(row => {
+    html += '<tr>' + state.headers.map(h => `<td>${row[h] ?? ''}</td>`).join('') + '</tr>';
+  });
+  html += '</tbody></table>';
+  fullDataTable.innerHTML = html;
+  fullDataTable.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function renderMetricSelector() {
+  if (!metricSelector) return;
+  const options = state.selectedMetrics.map(m => {
+    const id = `sel-${m.field.replace(/[^a-z0-9]/gi,'_')}`;
+    return `<label style="margin-right:12px;"><input type="checkbox" id="${id}" data-field="${m.field}" checked> ${m.field}</label>`;
+  }).join('');
+  metricSelector.innerHTML = `<div style=\"margin-bottom:8px; color:var(--gray)\">Choose metrics to export/share:</div>${options}`;
+}
+
+async function captureElementToCanvas(el) {
+  return html2canvas(el, { scale: 2, useCORS: true, allowTaint: true });
+}
+
+async function exportElementAsPng(el, filename) {
+  const canvas = await captureElementToCanvas(el);
+  const link = document.createElement('a');
+  link.download = filename;
+  link.href = canvas.toDataURL('image/png');
+  document.body.appendChild(link); link.click(); document.body.removeChild(link);
+}
+
+async function exportElementAsPdf(el, filename) {
+  const canvas = await captureElementToCanvas(el);
+  const imgData = canvas.toDataURL('image/png');
+  const pdf = new jsPDF('p', 'mm', 'a4');
+  const imgWidth = 210; const pageHeight = 295;
+  const imgHeight = (canvas.height * imgWidth) / canvas.width;
+  let heightLeft = imgHeight; let position = 0;
+  pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+  heightLeft -= pageHeight;
+  while (heightLeft > 0) { position = heightLeft - imgHeight; pdf.addPage(); pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight); heightLeft -= pageHeight; }
+  pdf.save(filename);
+}
+
+function exportElementAsDoc(el, filename) {
+  const html = `<!DOCTYPE html><html><head><meta charset=\"utf-8\"><title>Export</title></head><body>${el.innerHTML}</body></html>`;
+  const blob = new Blob([html], { type: 'application/msword' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url; link.download = filename; document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(url);
+}
+
+function getSelectedMetricFields() {
+  if (!metricSelector) return [];
+  return Array.from(metricSelector.querySelectorAll('input[type="checkbox"][data-field]'))
+    .filter(i => i.checked).map(i => i.getAttribute('data-field'));
+}
+
+function renderSelectedMetricsView() {
+  const selected = getSelectedMetricFields();
+  const container = document.createElement('div');
+  container.style.padding = '10px';
+  container.style.background = '#fff';
+  container.innerHTML = `<h4 style="margin-bottom:10px;">Selected Metrics</h4>`;
+  const tempGrid = document.createElement('div');
+  tempGrid.className = 'dashboard-grid';
+  container.appendChild(tempGrid);
+  const oldGridRef = dashboardGrid;
+  // Render into tempGrid
+  window.__oldGrid = oldGridRef;
+  const parent = tempGrid;
+  selected.forEach(field => {
+    const container = document.createElement('div');
+    container.className = 'dashboard-item';
+    const title = document.createElement('h3');
+    title.textContent = field;
+    container.appendChild(title);
+    const canvas = document.createElement('canvas');
+    container.appendChild(canvas);
+    parent.appendChild(container);
+    const ctx = canvas.getContext('2d');
+    // Simple bar for export view
+    const values = state.parsedData.map(row => parseFloat(row[field]) || 0).slice(0, 10);
+    new Chart(ctx, { type: 'bar', data: { labels: values.map((_,i)=> i+1), datasets: [{ data: values, backgroundColor: '#0a164d' }] }, options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } } });
+  });
+  return container;
+}
+
+// Hook up buttons
+if (renderFullTableBtn) renderFullTableBtn.addEventListener('click', renderFullDataTable);
+if (exportFullTablePngBtn) exportFullTablePngBtn.addEventListener('click', async () => { if (!fullDataTable.innerHTML) renderFullDataTable(); await exportElementAsPng(fullDataTable, 'insightpilot-full-table.png'); });
+if (exportFullTablePdfBtn) exportFullTablePdfBtn.addEventListener('click', async () => { if (!fullDataTable.innerHTML) renderFullDataTable(); await exportElementAsPdf(fullDataTable, 'insightpilot-full-table.pdf'); });
+if (exportFullTableDocBtn) exportFullTableDocBtn.addEventListener('click', () => { if (!fullDataTable.innerHTML) renderFullDataTable(); exportElementAsDoc(fullDataTable, 'insightpilot-full-table.doc'); });
+if (exportSelectedImageBtn) exportSelectedImageBtn.addEventListener('click', async () => { const view = renderSelectedMetricsView(); document.body.appendChild(view); await exportElementAsPng(view, 'insightpilot-selected-metrics.png'); document.body.removeChild(view); });
+if (exportSelectedPdfBtn) exportSelectedPdfBtn.addEventListener('click', async () => { const view = renderSelectedMetricsView(); document.body.appendChild(view); await exportElementAsPdf(view, 'insightpilot-selected-metrics.pdf'); document.body.removeChild(view); });
+if (shareSelectedBtn) shareSelectedBtn.addEventListener('click', () => {
+  const selectedFields = getSelectedMetricFields();
+  const dashboardData = {
+    data: state.parsedData,
+    headers: state.headers,
+    selectedMetrics: state.selectedMetrics.filter(m => selectedFields.includes(m.field)),
+    chartTypes: Object.fromEntries(Object.entries(state.chartTypes).filter(([k]) => selectedFields.includes(k))),
+    creator: state.currentUser,
+    createdAt: new Date().toISOString()
+  };
+  fallbackShare(dashboardData);
+});
 
 // Export as PDF
 exportPdfBtn.addEventListener('click', async () => {

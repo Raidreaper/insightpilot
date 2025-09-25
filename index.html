@@ -319,6 +319,24 @@ Widget B,200,2025-01-16"></textarea>
 
           <div class="dashboard-grid" id="dashboardGrid"></div>
 
+          <div class="card" id="exportControls" style="margin-top:10px;">
+            <h3 style="margin-bottom:10px;">Export & Share Options</h3>
+            <div id="metricSelector" style="margin:10px 0;"></div>
+            <div class="share-links">
+              <button class="share-btn" id="renderFullTableBtn">📋 Render Full Data Table</button>
+              <button class="share-btn" id="exportFullTablePngBtn">🖼️ Export Full Table PNG</button>
+              <button class="share-btn" id="exportFullTablePdfBtn">📄 Export Full Table PDF</button>
+              <button class="share-btn" id="exportFullTableDocBtn">📝 Export Full Table DOC</button>
+            </div>
+            <div class="share-links" style="margin-top:10px;">
+              <button class="share-btn" id="exportSelectedImageBtn">🖼️ Export Selected Metrics</button>
+              <button class="share-btn" id="exportSelectedPdfBtn">📄 Export Selected Metrics PDF</button>
+              <button class="share-btn" id="shareSelectedBtn">🔗 Share Selected Metrics</button>
+            </div>
+          </div>
+
+          <div id="fullDataTable" class="data-preview"></div>
+
           <div class="share-links">
             <button class="share-btn" id="exportPdfBtn">
               📄 Export as PDF
